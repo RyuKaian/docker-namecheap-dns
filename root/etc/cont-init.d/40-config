@@ -1,0 +1,27 @@
+#!/usr/bin/with-contenv bash
+
+  #Check to make sure the domain, hosts and token are set
+if [ -z "$DOMAIN" ] || [ -z "$HOSTS" ] || [ -z "$TOKEN" ]; then
+  echo "Please pass your domain, host(s) and token as environment variables in your docker run command. See docker info for more details."
+  exit 1
+else
+  echo "Retrieving domain, host(s) and token from the environment variables"
+  echo -e "DOMAIN=$DOMAIN HOSTS=$HOSTS TOKEN=$TOKEN" > /app/namecheap.conf
+fi
+
+# modify crontab if logging to file
+if [ "$LOG_FILE" = "true" ]; then
+  crontab -u abc /defaults/namecheapcron
+  echo "log will be output to file"
+else
+  echo "log will be output to docker log"
+fi
+
+# permissions
+chown -R abc:abc \
+	/app \
+	/config
+
+# run initial IP update
+exec \
+	s6-setuidgid abc /app/namecheap.sh

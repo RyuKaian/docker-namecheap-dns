@@ -1,0 +1,1 @@
+*/5 * * * * /app/namecheap.sh 2>&1 > /config/namecheap.log
